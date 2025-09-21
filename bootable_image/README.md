@@ -8,7 +8,7 @@ startup. It is a fully bootable filesystem image.
 ## Table of Contents
 
 -[Prerequisites](#Prerequisites)
-- [Usage](#usage)  
+- [Usage](#usage)
 - [License](#license)  
 
 ## Prerequisites 
@@ -41,3 +41,4 @@ Run the script:
 
 ## License 
 MIT License. [License](https://github.com/Lars-Codes/Canonical-Assessment-/blob/master/LICENSE)
+
