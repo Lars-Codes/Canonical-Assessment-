@@ -6,14 +6,6 @@ import (
     "crypto/rand"
 )
 
-func main(){
-
-    filePath := "test.txt"
-    overwriteCount := 3 
-
-    shred(filePath, overwriteCount)
-}
-
 /*
     Purpose: Generate a given number of random bytes using secure library crypto/rand. 
     Parameters: 
@@ -42,18 +34,22 @@ func GenerateRandomBytes(numBytes int64)([]byte, error){
         - filePath: Path to file to shred 
         - overwriteCount: Number of times to overwrite the file with random bytes 
 
+    Return value: 
+        - error: Returns error if error 
 */
-func shred(filePath string, overwriteCount int){
+func Shred(filePath string, overwriteCount int) error{
     // Check if file exists 
     _, err := os.Stat(filePath)
     if os.IsNotExist(err){
-        log.Fatalf("Filepath %s does not exist", filePath)
+        log.Printf("Filepath %s does not exist", filePath)
+        return err 
     }
 
     // Get size of file 
     fileStats, err := os.Stat(filePath)
     if err != nil{
-        log.Fatal("Error getting stats from file: ", err, " Exiting application.")
+        log.Print("Error getting stats from file: ", err)
+        return err 
     }
     fileSize := fileStats.Size()
     log.Println("Size of file: ", fileSize)
@@ -61,15 +57,23 @@ func shred(filePath string, overwriteCount int){
     // Store read/write permissions 
     permissions := os.FileMode(0644)
 
+    // Assign permissions to file 
+    err = os.Chmod(filePath, 0644)
+    if err != nil {
+        log.Print("Error setting file permissions: ", err)
+        return err
+    }
     // Overwrite file specified # of times 
     for i:=0; i<overwriteCount; i++{
         randomBytes, err := GenerateRandomBytes(fileSize)
         if err != nil{
-            log.Fatal("Error generating random bytes: ", err, " Exiting application.")
+            log.Print("Error generating random bytes: ", err)
+            return err 
         }
         err = os.WriteFile(filePath, randomBytes, permissions)
         if err != nil {
-            log.Fatal("Error writing random bytes to file: ", err, " Exiting application.")
+            log.Print("Error writing random bytes to file: ", err)
+            return err 
         }
         log.Println("Shredding file. Pass #", i+1, " complete.")
     }
@@ -77,7 +81,8 @@ func shred(filePath string, overwriteCount int){
     log.Println("Deleting file...")
     os.Remove(filePath)
     if err != nil {
-        log.Fatal("Error deleting file: ", err, " Exiting application.")
+        log.Print("Error deleting file: ", err)
+        return err 
     }
-
+    return nil 
 }
