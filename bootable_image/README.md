@@ -14,14 +14,14 @@ startup. It is a fully bootable filesystem image.
 
 Because the assignment specifies that the script will be tested on Ubuntu 20.04 LTS or 22.04 LTS, this script assumes that the following packages are installed: 
 
-bash
-sudo
-wget
-cpio
-gzip
-qemu-system-x86_64
-losetup
-mkfs.ext4
+- bash
+- sudo
+- wget
+- cpio
+- gzip
+- qemu-system-x86_64
+- losetup
+- mkfs.ext4
 
 
 ## Usage 
@@ -40,5 +40,6 @@ Run the script:
 
 ## License 
 MIT License. [License](https://github.com/Lars-Codes/Canonical-Assessment-/blob/master/LICENSE)
+
 
 
