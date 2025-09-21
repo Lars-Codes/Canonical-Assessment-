@@ -4,6 +4,7 @@ import (
 	"testing"
 	"os"
 	"fmt"
+	"bytes"
 )
 
 func createFile(t *testing.T, name string, data []byte) string {
@@ -172,4 +173,77 @@ func TestShredLongFilename(t *testing.T) {
 	if err := Shred(file, 3); err != nil {
 		t.Errorf("Shred failed on long filename: %v", err)
 	}
+}
+
+func TestShredMultiLineFile(t *testing.T) {
+	fmt.Println("\nTestShredMultiLineFile")
+
+	// Create a multi-line text file
+	content := []byte("Line 1\nLine 2\nLine 3\nLine 4\nLine 5")
+	file := createFile(t, "multiline.txt", content)
+
+	// Run Shred
+	err := Shred(file, 3)
+	if err != nil {
+		t.Fatalf("Shred failed: %v", err)
+	}
+
+	// Verify the file is deleted
+	if _, err := os.Stat(file); !os.IsNotExist(err) {
+		t.Errorf("File not deleted after shredding")
+	}
+}
+
+// Test different data types 
+func TestShredOtherDataTypes(t *testing.T) {
+	fmt.Println("\nTestShredOtherDataTypes")
+
+	// Binary files
+	binaryFiles := map[string][]byte{
+		"binary1.bin": {0x01, 0x02, 0x03, 0x04}, // random bytes 
+		"binary2.bin": {0xAA, 0xBB, 0xCC, 0xDD}, // High bits 
+		"binary3.bin": {0x00, 0xFF, 0x7F, 0x80}, // zeros, ones, neg 
+	}
+
+	// Special byte patterns
+	patternFiles := map[string][]byte{
+		"zeros.bin":   make([]byte, 1024),                       // 0x00
+		"ones.bin":    bytes.Repeat([]byte{0xFF}, 1024),        // 0xFF
+		"pattern.bin": bytes.Repeat([]byte{0xAA, 0x55}, 512),   // repeating pattern
+	}
+
+	// Sparse file
+	sparseFile := "sparse.bin"
+	f, _ := os.Create(sparseFile)
+	f.Seek(1024*1024-1, 0) // 1MB hole
+	f.Write([]byte{0x00})
+	f.Close()
+
+
+	// Helper to shred and verify deletion
+	shredAndVerify := func(fileName string) {
+		t.Log("Shredding: ", fileName)
+		err := Shred(fileName, 3)
+		if err != nil {
+			t.Error("Shred failed for ", fileName, ", Error: ", err)
+		}
+		if _, err := os.Stat(fileName); !os.IsNotExist(err) {
+			t.Error("File not deleted: ", fileName)
+		}
+	}
+
+	// Binary files
+	for name, data := range binaryFiles {
+		createFile(t, name, data)
+		shredAndVerify(name)
+	}
+
+	// Pattern files
+	for name, data := range patternFiles {
+		createFile(t, name, data)
+		shredAndVerify(name)
+	}
+
+	// Sparse file
+	shredAndVerify(sparseFile)
 }
