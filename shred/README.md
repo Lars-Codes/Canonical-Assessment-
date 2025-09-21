@@ -49,4 +49,4 @@ go test -v
 ```
 
 ## License 
-MIT License. [License]()
+MIT License. [License](https://github.com/Lars-Codes/Canonical-Assessment-/blob/master/LICENSE)
